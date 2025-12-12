@@ -30,9 +30,6 @@ def join_low_tracks(low_array, tstep_col, lat_col, lon_col, center_id_col, spac_
 
     # get the number of rows in the array to loop through
     l = np.shape(low_array)[0]
-
-    # identify the width of the array, to refer to the last 3 columns as we compute the distances between low centers
-    array_width = np.shape(low_array)[1]
     
     # to set up a loop through each low entry.
     entry_range = np.arange(0,l)
@@ -69,27 +66,28 @@ def join_low_tracks(low_array, tstep_col, lat_col, lon_col, center_id_col, spac_
         #center of the low reccorded in each row of next_event_entries by pythagoras's theorem. 
         #Note we already have the condition that each of the lows in prev_event_entries
         #are within the distance box_size2 of the current low center. 
-        next_event_entries[:,array_width - 3] = abs(next_event_entries[:,lat_col] - lat)
+        # These distances are stored in the last 3 columns of the array. 
+        next_event_entries[:, -3] = abs(next_event_entries[:,lat_col] - lat)
 
         # These three lines handle the longitude differences that cross 0 degrees longitude
         lon_diff1 = abs(next_event_entries[:,lon_col] - lon)
         lon_diff2 = 360 - abs(next_event_entries[:,lon_col] - lon)
 
-        next_event_entries[:,array_width - 2] = np.min((lon_diff1, lon_diff2), axis = 0)
+        next_event_entries[:, -2] = np.min((lon_diff1, lon_diff2), axis = 0)
 
-        # compute the diagonal distance by pythagoras
-        next_event_entries[:,array_width - 1] = ((next_event_entries[:,array_width - 3]) ** 2 + (next_event_entries[:,array_width - 2]) ** 2) ** 0.5
+        # compute the diagonal distance by pythagoras, and store it in the last column of the array
+        next_event_entries[:, -1] = ((next_event_entries[:, -3]) ** 2 + (next_event_entries[:, -2]) ** 2) ** 0.5
         
         if np.shape(next_event_entries)[0] > 0:
 
             # find the distance of the closest low center
-            min_distance = np.min(next_event_entries[:,array_width - 1])
+            min_distance = np.min(next_event_entries[:, -1])
 
             # test if the minimum distance is below the spatial threshold to join
             if min_distance <= spac_threshold:
 
                 # locate the row of the closest cyclone in the next timestep
-                i_min = next_event_entries[:,array_width - 1] == min_distance
+                i_min = next_event_entries[:, -1] == min_distance
                 next_track_location = next_event_entries[i_min,:]
     
                 # INCLUDE A FEATURE THAT TESTS IF THERE ARE MORE THAN ONE FUTURE LOW CENTERS IDENTIFIED
@@ -146,8 +144,7 @@ def reorder_lows(array, tstep_col):
 
     # trim off the extra 3 columns for distance computations before returning the 
     # new_array2 out of the function
-    array_width = np.shape(new_array)[1]
-    new_array = new_array[:,:array_width - 3]
+    new_array = new_array[:,:-3]
 
     return new_array
 
