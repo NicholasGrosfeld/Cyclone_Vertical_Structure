@@ -16,6 +16,10 @@
 # -inner geopotential height gradient; 
 # -outer geopotential height gradient.
 
+
+# Note: This code has been adapted to run in blocks of 10 years, as running the whole 44 year dataset in one go takes longer than
+# the time allowance on our compute nodes. Future work to improve the runtime of this code may remove the need to run it in blocks.
+
 #============================== Import modules ===============================
 import numpy as np
 from datetime import datetime
@@ -413,19 +417,19 @@ TIME_Y0 = 1900 # This is required to re-compute the tstep values to loop over
 DISTANCE_THRESHOLD = 5 # degrees lat/lon
 
 # Data I/O parameters
-data_path = '/g/data/m35/nxg561/Cyclone_Identification/June2025/'
+data_path = '/g/data/m35/nxg561/02_Cyclone_Vertical_Structure/Cyclone_Identification/Nov2025/'
 
 # =============================== Load Cyclone Data ===========================================
 
 # input all the files
-input_filename_900 = 'low_tracks_pg_900_era5_sh.txt'
-input_filename_800 = 'low_tracks_pg_800_era5_sh.txt'
-input_filename_700 = 'low_tracks_pg_700_era5_sh.txt'
-input_filename_600 = 'low_tracks_pg_600_era5_sh.txt'
-input_filename_500 = 'low_tracks_pg_500_era5_sh.txt'
-input_filename_400 = 'low_tracks_pg_400_era5_sh.txt'
-input_filename_300 = 'low_tracks_pg_300_era5_sh.txt'
-input_filename_200 = 'low_tracks_pg_200_era5_sh.txt'
+input_filename_900 = 'low_tracks_900_sh.txt'
+input_filename_800 = 'low_tracks_800_sh.txt'
+input_filename_700 = 'low_tracks_700_sh.txt'
+input_filename_600 = 'low_tracks_600_sh.txt'
+input_filename_500 = 'low_tracks_500_sh.txt'
+input_filename_400 = 'low_tracks_400_sh.txt'
+input_filename_300 = 'low_tracks_300_sh.txt'
+input_filename_200 = 'low_tracks_200_sh.txt'
 
 z900_tracks = np.loadtxt(data_path + input_filename_900, delimiter = ',')
 z800_tracks = np.loadtxt(data_path + input_filename_800, delimiter = ',')
@@ -441,14 +445,14 @@ z200_tracks = np.loadtxt(data_path + input_filename_200, delimiter = ',')
 if y_previous:
 
     # get the last stack number to be assigned in the previous block of years
-    z200_tracks_old = np.loadtxt(data_path + 'low_stacks_pg_200_era5_sh_' + str(y_previous) + '.txt', delimiter = ',')
-    z300_tracks_old = np.loadtxt(data_path + 'low_stacks_pg_300_era5_sh_' + str(y_previous) + '.txt', delimiter = ',')
-    z400_tracks_old = np.loadtxt(data_path + 'low_stacks_pg_400_era5_sh_' + str(y_previous) + '.txt', delimiter = ',')
-    z500_tracks_old = np.loadtxt(data_path + 'low_stacks_pg_500_era5_sh_' + str(y_previous) + '.txt', delimiter = ',')
-    z600_tracks_old = np.loadtxt(data_path + 'low_stacks_pg_600_era5_sh_' + str(y_previous) + '.txt', delimiter = ',')
-    z700_tracks_old = np.loadtxt(data_path + 'low_stacks_pg_700_era5_sh_' + str(y_previous) + '.txt', delimiter = ',')
-    z800_tracks_old = np.loadtxt(data_path + 'low_stacks_pg_800_era5_sh_' + str(y_previous) + '.txt', delimiter = ',')
-    z900_tracks_old = np.loadtxt(data_path + 'low_stacks_pg_900_era5_sh_' + str(y_previous) + '.txt', delimiter = ',')
+    z200_tracks_old = np.loadtxt(data_path + 'low_stacks_200_sh_' + str(y_previous) + '.txt', delimiter = ',')
+    z300_tracks_old = np.loadtxt(data_path + 'low_stacks_300_sh_' + str(y_previous) + '.txt', delimiter = ',')
+    z400_tracks_old = np.loadtxt(data_path + 'low_stacks_400_sh_' + str(y_previous) + '.txt', delimiter = ',')
+    z500_tracks_old = np.loadtxt(data_path + 'low_stacks_500_sh_' + str(y_previous) + '.txt', delimiter = ',')
+    z600_tracks_old = np.loadtxt(data_path + 'low_stacks_600_sh_' + str(y_previous) + '.txt', delimiter = ',')
+    z700_tracks_old = np.loadtxt(data_path + 'low_stacks_700_sh_' + str(y_previous) + '.txt', delimiter = ',')
+    z800_tracks_old = np.loadtxt(data_path + 'low_stacks_800_sh_' + str(y_previous) + '.txt', delimiter = ',')
+    z900_tracks_old = np.loadtxt(data_path + 'low_stacks_900_sh_' + str(y_previous) + '.txt', delimiter = ',')
     
     previous_stack_nums = np.concatenate((z200_tracks_old[:,0], z300_tracks_old[:,0], z400_tracks_old[:,0], 
                                          z500_tracks_old[:,0], z600_tracks_old[:,0], z700_tracks_old[:,0], 
@@ -543,11 +547,11 @@ for track_num in z200_unassigned_track_nums:
     z200_tracks[z200_tracks[:,1] == track_num, 0] = highest_stack_num
 
 # save output
-np.savetxt(data_path + 'low_stacks_pg_900_era5_sh_' + str(y_start) + '.txt', z900_tracks, delimiter = ',')
-np.savetxt(data_path + 'low_stacks_pg_800_era5_sh_' + str(y_start) + '.txt', z800_tracks, delimiter = ',') 
-np.savetxt(data_path + 'low_stacks_pg_700_era5_sh_' + str(y_start) + '.txt', z700_tracks, delimiter = ',') 
-np.savetxt(data_path + 'low_stacks_pg_600_era5_sh_' + str(y_start) + '.txt', z600_tracks, delimiter = ',') 
-np.savetxt(data_path + 'low_stacks_pg_500_era5_sh_' + str(y_start) + '.txt', z500_tracks, delimiter = ',') 
-np.savetxt(data_path + 'low_stacks_pg_400_era5_sh_' + str(y_start) + '.txt', z400_tracks, delimiter = ',') 
-np.savetxt(data_path + 'low_stacks_pg_300_era5_sh_' + str(y_start) + '.txt', z300_tracks, delimiter = ',') 
-np.savetxt(data_path + 'low_stacks_pg_200_era5_sh_' + str(y_start) + '.txt', z200_tracks, delimiter = ',') 
+np.savetxt(data_path + 'low_stacks_900_sh_' + str(y_start) + '.txt', z900_tracks, delimiter = ',')
+np.savetxt(data_path + 'low_stacks_800_sh_' + str(y_start) + '.txt', z800_tracks, delimiter = ',') 
+np.savetxt(data_path + 'low_stacks_700_sh_' + str(y_start) + '.txt', z700_tracks, delimiter = ',') 
+np.savetxt(data_path + 'low_stacks_600_sh_' + str(y_start) + '.txt', z600_tracks, delimiter = ',') 
+np.savetxt(data_path + 'low_stacks_500_sh_' + str(y_start) + '.txt', z500_tracks, delimiter = ',') 
+np.savetxt(data_path + 'low_stacks_400_sh_' + str(y_start) + '.txt', z400_tracks, delimiter = ',') 
+np.savetxt(data_path + 'low_stacks_300_sh_' + str(y_start) + '.txt', z300_tracks, delimiter = ',') 
+np.savetxt(data_path + 'low_stacks_200_sh_' + str(y_start) + '.txt', z200_tracks, delimiter = ',') 
